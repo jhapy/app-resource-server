@@ -1,0 +1,66 @@
+substitutions:
+  _CLOUDSDK_COMPUTE_ZONE: europe-west1-b
+  _GS_NAME: jhapy-dev
+  _REMOTE_SERVER: jhapy-dev-01
+steps:
+  - id: 'Restore Maven Repository from GS'
+    name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '-c', 'gs://${_GS_NAME}/m2.tgz', 'm2.tgz']
+  - id: 'Restore Maven Repository'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        tar xzf m2.tgz -C /root
+    volumes:
+      - name: 'm2'
+        path: /root/.m2
+  - id: 'Compile project'
+    name: maven:3-jdk-14
+    entrypoint: 'mvn'
+    args: ['-s', '.settings.xml', '-Dmaven.wagon.http.ssl.insecure=true', 'clean', 'install']
+    secretEnv: ['NEXUS_PASSWORD']
+    env:
+      - 'NEXUS_USERNAME=${_NEXUS_USERNAME}'
+    volumes:
+      - name: 'm2'
+        path: /root/.m2
+  - id: 'Backup Maven Repository'
+    name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        rm -rf /root/.m2/repository/org/jhapy
+        tar czf m2.tgz -C /root .m2
+    volumes:
+      - name: 'm2'
+        path: /root/.m2
+  - id: 'Copy Maven Repository to GS'
+    name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', 'm2.tgz', 'gs://${_GS_NAME}/m2.tgz']
+  - id: 'Get Docker cached image'
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker pull eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest || exit 0
+  - id: 'Build image'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest', '--cache-from', 'eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest', '.']
+  - id: 'Push image'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest']
+  - id: 'Update the image'
+    name: 'gcr.io/cloud-builders/gcloud'
+    args: ['beta', 'compute', '--project', '$PROJECT_ID', 'ssh', '--zone', "$_CLOUDSDK_COMPUTE_ZONE", "jhapy@$_REMOTE_SERVER", "--command", "docker service update --force --with-registry-auth --image eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest jhapy_${_ARTIFACT_ID}"]
+
+images:
+  - 'eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest'
+
+secrets:
+  - kmsKeyName: projects/jhapy/locations/global/keyRings/NEXUS_ACCESS/cryptoKeys/NEXUS_PASSWORD
+    secretEnv:
+      NEXUS_PASSWORD: CiQA7KCiyxvVWTKmRC3rGAAuzO4+YIs7y5m32LzFuhRv933LlgMSMgA2Y3W52qiYnnObkWtCcLx+Njo9wrMjybRNCFfb0htqMO761GBUMsVpy1QjeWE5QIx1
