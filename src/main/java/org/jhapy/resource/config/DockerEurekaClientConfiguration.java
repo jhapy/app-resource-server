@@ -1,3 +1,21 @@
+/*
+ * Copyright 2020-2020 the original author or authors from the JHapy project.
+ *
+ * This file is part of the JHapy project, see https://www.jhapy.org/ for more information.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jhapy.resource.config;
 
 import java.net.Inet4Address;
@@ -10,6 +28,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.net.util.SubnetUtils;
+import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.commons.utils.SpringProfileConstants;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
@@ -22,8 +42,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
-import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.SpringProfileConstants;
 
 @Profile(SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT_EUREKA)
 @Configuration
@@ -61,10 +79,13 @@ public class DockerEurekaClientConfiguration implements
         .parseBoolean(env.getProperty("eureka.instance.secure-port-enabled"));
     String serverContextPath = this.env.getProperty("server.servlet.context-path", "/");
     int serverPort = Integer
-        .valueOf(this.env.getProperty("server.port", this.env.getProperty("port", "8080")));
+        .parseInt(this.env.getProperty("server.port", this.env.getProperty("port", "8080")));
     Integer managementPort = this.env
-        .getProperty("management.server.port", Integer.class);
-    String managementContextPath = this.env.getProperty("management.server.servlet.context-path");
+        .getProperty("management.server.port", Integer.class, serverPort);
+    Boolean isManagementSecuredPortEnabled = this.env
+        .getProperty("management.server.ssl.enabled", Boolean.class, false);
+    String managementContextPath = this.env.getProperty("management.servlet.context-path",
+        this.env.getProperty("management.endpoints.web.base-path", "/management"));
     Integer jmxPort = this.env
         .getProperty("com.sun.management.jmxremote.port", Integer.class);
     EurekaInstanceConfigBean instance = new EurekaInstanceConfigBean(inetUtils);
@@ -124,9 +145,6 @@ public class DockerEurekaClientConfiguration implements
 
         external_loop:
         for (NetworkInterface networkInterface : Collections.list(networkInterfaces)) {
-          if (networkInterface.getName().startsWith("lo")) {
-            continue;
-          }
           for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
             if (interfaceAddress.getAddress() instanceof Inet4Address) {
               logger().info(loggerPrefix +
@@ -152,7 +170,8 @@ public class DockerEurekaClientConfiguration implements
                       interfaceAddress.getAddress().getHostName(),
                       interfaceAddress.getAddress().getHostAddress()
                   );
-                  result = createEurekaInstanceConfigBean(inetUtils, instance, interfaceAddress);
+                  result = createEurekaInstanceConfigBean(inetUtils, instance,
+                      isManagementSecuredPortEnabled, managementContextPath, interfaceAddress);
                   break external_loop;
                 }
               }
@@ -185,30 +204,41 @@ public class DockerEurekaClientConfiguration implements
   }
 
   private EurekaInstanceConfigBean createEurekaInstanceConfigBean(InetUtils inetUtils,
-      EurekaInstanceConfigBean defaultResult, InterfaceAddress interfaceAddress) {
+      EurekaInstanceConfigBean defaultResult, Boolean isManagementSecuredPortEnabled,
+      String managementContextPath, InterfaceAddress interfaceAddress) {
     EurekaInstanceConfigBean result;
     result = new EurekaInstanceConfigBean(inetUtils);
-    result.setPreferIpAddress(true);
-    result.setHostname(interfaceAddress.getAddress().getHostName());
+    result.setPreferIpAddress(defaultResult.isPreferIpAddress());
+    result.setHostname(defaultResult.getHostname());
     result.setIpAddress(interfaceAddress.getAddress().getHostAddress());
     result.setSecurePortEnabled(defaultResult.isSecurePortEnabled());
     result.setSecurePort(defaultResult.getSecurePort());
     result.setNonSecurePortEnabled(defaultResult.isNonSecurePortEnabled());
     result.setNonSecurePort(defaultResult.getNonSecurePort());
-    result.setMetadataMap(defaultResult.getMetadataMap());
-    if (result.isSecurePortEnabled()) {
-      result.setInstanceId(result.getIpAddress() + ":" + result.getHostname() + ":" +
-          result.getSecurePort());
-      result.setSecureHealthCheckUrl("https://" + result.getIpAddress() + ":" +
-          result.getSecurePort() + defaultResult.getHealthCheckUrlPath());
+
+    String managementUrl;
+    if (isManagementSecuredPortEnabled) {
+      managementUrl = "https://";
     } else {
-      result.setInstanceId(result.getIpAddress() + ":" + result.getHostname() + ":" +
-          result.getNonSecurePort());
-      result.setHealthCheckUrl("http://" + result.getIpAddress() + ":" +
-          result.getNonSecurePort() + defaultResult.getHealthCheckUrlPath());
-      result.setStatusPageUrl("http://" + result.getIpAddress() + ":" +
-          result.getNonSecurePort() + defaultResult.getStatusPageUrlPath());
+      managementUrl = "http://";
     }
+    if (defaultResult.isPreferIpAddress()) {
+      managementUrl += result.getIpAddress();
+    } else {
+      managementUrl += result.getHostname();
+    }
+
+    managementUrl += ":" + defaultResult.getMetadataMap().get("management.port");
+
+    managementUrl += managementContextPath;
+    defaultResult.getMetadataMap().put("management.url", managementUrl);
+    result.setMetadataMap(defaultResult.getMetadataMap());
+    result.setInstanceId(result.getInstanceId());
+    result.setHealthCheckUrlPath(defaultResult.getHealthCheckUrlPath());
+    result.setHealthCheckUrl(defaultResult.getHealthCheckUrl());
+    result.setStatusPageUrlPath(defaultResult.getStatusPageUrlPath());
+    result.setStatusPageUrl(defaultResult.getStatusPageUrl());
+
     return result;
   }
 }
