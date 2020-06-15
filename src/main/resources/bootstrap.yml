@@ -2,7 +2,7 @@ spring:
   application.name: app-resource-server
   cloud:
     config:
-      uri: http://utils-config-server:8761/config
+      uri: http://utils-config-server:8888/config
       fail-fast: true
       username: admin
       password: ${jhapy.registry.password}
