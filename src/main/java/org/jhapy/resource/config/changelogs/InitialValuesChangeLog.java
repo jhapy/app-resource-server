@@ -20,6 +20,7 @@ package org.jhapy.resource.config.changelogs;
 
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
+import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Component;
 public class InitialValuesChangeLog {
 
   @ChangeSet(order = "001", id = "createCollection", author = "jHapy Dev1")
-  public void createCollection(MongoTemplate mongoTemplate) {
+  public void createCollection(MongockTemplate mongoTemplate) {
     if (!mongoTemplate.collectionExists("storedFile")) {
       mongoTemplate.createCollection("storedFile");
     }

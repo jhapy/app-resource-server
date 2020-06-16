@@ -19,6 +19,7 @@
 package org.jhapy.resource.config;
 
 
+import com.github.cloudyrock.spring.v5.EnableMongock;
 import org.jhapy.commons.utils.HasLogger;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
@@ -44,6 +45,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 @EnableMongoRepositories(basePackages = "org.jhapy.resource.repository")
 @EntityScan("org.jhapy.resource.domain")
 @EnableTransactionManagement
+@EnableMongock
 public class DatabaseConfiguration implements HasLogger {
 
   @Bean
