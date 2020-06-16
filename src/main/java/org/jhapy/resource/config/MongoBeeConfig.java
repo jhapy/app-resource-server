@@ -18,7 +18,7 @@
 
 package org.jhapy.resource.config;
 
-import com.github.cloudyrock.mongock.driver.mongodb.springdata.v2.SpringDataMongo2Driver;
+import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.SpringDataMongo3Driver;
 import com.github.cloudyrock.spring.v5.MongockSpring5;
 import org.jhapy.commons.utils.HasLogger;
 import org.springframework.beans.factory.InitializingBean;
@@ -39,7 +39,7 @@ public class MongoBeeConfig implements HasLogger {
       ApplicationContext applicationContext) {
     String loggerPrefix = getLoggerPrefix("mongobeeGlobal");
 
-    SpringDataMongo2Driver driver = new SpringDataMongo2Driver(mongoTemplate);
+    SpringDataMongo3Driver driver = new SpringDataMongo3Driver(mongoTemplate);
     driver.setChangeLogCollectionName("dbChangelog"); // compatibility with mongobee
     driver.setLockCollectionName("dbChangelogLock");
 
