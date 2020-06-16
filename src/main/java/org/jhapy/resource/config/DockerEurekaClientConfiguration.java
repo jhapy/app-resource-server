@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
 
-@Profile(SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT_EUREKA)
+
 @Configuration
 public class DockerEurekaClientConfiguration implements
     HasLogger {
