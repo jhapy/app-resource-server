@@ -60,6 +60,18 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
   }
 
   @Override
+  public StoredFile getByIdNoContent(String id) {
+    StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
+    if ( storedFile != null ) {
+      storedFile.setContent(null);
+      storedFile.setOrginalContent(null);
+      return storedFile;
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   @Transactional
   public StoredFile save(StoredFile entity) {
     if (entity == null) {

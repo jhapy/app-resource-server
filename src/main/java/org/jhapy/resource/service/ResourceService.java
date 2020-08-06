@@ -32,4 +32,6 @@ public interface ResourceService {
   StoredFile getById(String id);
 
   void delete(String id);
+
+  StoredFile getByIdNoContent(String id);
 }
