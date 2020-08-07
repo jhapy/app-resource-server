@@ -8,6 +8,9 @@ RUN yum update -y && \
 ENV JAVA_OPTS=""
 ENV APP_OPTS=""
 
+ADD devgcp.crt /tmp/
+RUN $JAVA_HOME/bin/keytool -importcert -file /tmp/devgcp.crt -alias devgcp -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+
 ADD target/app-resource-server.jar /app/
 
 ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app/app-resource-server.jar $APP_OPTS"]
