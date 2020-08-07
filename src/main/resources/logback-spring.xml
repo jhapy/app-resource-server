@@ -32,7 +32,7 @@
 
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
-      <appender-ref ref="GELF"/>
+      <!--appender-ref ref="GELF"/-->
     </root>
   </springProfile>
 
