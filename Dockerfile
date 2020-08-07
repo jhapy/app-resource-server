@@ -1,4 +1,4 @@
-FROM openjdk:13-jdk-oracle
+FROM openjdk:14-jdk-oracle
 
 MAINTAINER jHapy Lead Dev <jhapy@jhapy.org>
 
