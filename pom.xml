@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.3.2.RELEASE</version>
+    <version>2.3.3.RELEASE</version>
     <relativePath/>
   </parent>
 
@@ -36,7 +36,7 @@
     <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
 
     <spring-cloud.version>Hoxton.SR7</spring-cloud.version>
-    <spring-data.version>Neumann-SR2</spring-data.version>
+    <spring-data.version>Neumann-SR3</spring-data.version>
 
     <problem-spring-web.version>0.25.2</problem-spring-web.version>
     <micrometer-core.version>1.5.1</micrometer-core.version>
