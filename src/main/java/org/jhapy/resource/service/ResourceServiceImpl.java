@@ -128,7 +128,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
         storedFile.setPdfConvertStatus(PdfConvert.CONVERTED);
         nbConverted.getAndIncrement();
       }
-      if (storedFile.getMd5Content() == null) {
+      if (storedFile.getMd5Content() == null && storedFile.getContent() != null) {
         storedFile.setMd5Content(DigestUtils.md5Digest(storedFile.getContent()));
       }
     });
