@@ -143,6 +143,8 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
             logger().error(loggerPrefix+"GridFS pdf file not found");
           }
       }
+    } else {
+      logger().debug(loggerPrefix+"File not found" );
     }
     return storedFile;
   }
@@ -205,7 +207,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
     AtomicInteger nbConverted = new AtomicInteger();
     AtomicInteger nbNotSupported = new AtomicInteger();
     storedFiles.getContent().forEach(storedFile -> {
-      if (!storedFile.getMimeType().contains("pdf") && !storedFile.getMimeType().startsWith("image")) {
+      if (storedFile.getMimeType().contains("pdf") || storedFile.getMimeType().startsWith("image")) {
         storedFile.setPdfConvertStatus(PdfConvert.NOT_NEEDED);
       } else {
         byte[] converted = convertToPdf(storedFile);
