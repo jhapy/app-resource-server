@@ -74,6 +74,17 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @PostMapping(value = "/getByIdPdfContent")
+  public ResponseEntity<ServiceResult> getByIdPdfContent(@RequestBody GetByStrIdQuery query) {
+    String loggerPrefix = getLoggerPrefix("getByIdPdfContent");
+    try {
+      return handleResult(loggerPrefix, mapperFacade.map(resourceService
+          .getByIdPdfContent(query.getId()), org.jhapy.dto.utils.StoredFile.class, getOrikaContext(query)));
+    } catch (Throwable t) {
+      return handleResult(loggerPrefix, t);
+    }
+  }
+
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.utils.StoredFile> query) {

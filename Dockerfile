@@ -3,7 +3,18 @@ FROM openjdk:14-jdk-oracle
 MAINTAINER jHapy Lead Dev <jhapy@jhapy.org>
 
 RUN yum update -y && \
-    yum clean all
+    yum install -y wget dbus-libs cairo cups
+
+RUN cd /tmp && \
+    wget https://download.documentfoundation.org/libreoffice/stable/7.0.1/rpm/x86_64/LibreOffice_7.0.1_Linux_x86-64_rpm.tar.gz && \
+    tar -xvzf LibreOffice_7.0.1_Linux_x86-64_rpm.tar.gz && \
+    cd LibreOffice_7.0.1.2_Linux_x86-64_rpm/RPMS/ && \
+    rm libobasis7.0-gnome-integration-7.0.1.2-2.x86_64.rpm libobasis7.0-kde-integration-7.0.1.2-2.x86_64.rpm libreoffice7.0-freedesktop-menus-7.0.1-2.noarch.rpm
+    yum -y localinstall *.rpm && \
+    cd ../.. && \
+    rm -rf LibreOffice_7.0.1*
+
+RUN yum clean all
 
 ENV JAVA_OPTS=""
 ENV APP_OPTS=""

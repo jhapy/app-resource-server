@@ -34,4 +34,6 @@ public interface ResourceService {
   void delete(String id);
 
   StoredFile getByIdNoContent(String id);
+
+  StoredFile getByIdPdfContent(String id);
 }

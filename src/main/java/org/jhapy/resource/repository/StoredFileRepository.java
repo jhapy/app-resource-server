@@ -18,7 +18,11 @@
 
 package org.jhapy.resource.repository;
 
+import java.util.List;
+import org.jhapy.resource.domain.PdfConvert;
 import org.jhapy.resource.domain.StoredFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
@@ -28,4 +32,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  */
 public interface StoredFileRepository extends MongoRepository<StoredFile, String> {
 
+  List<StoredFile> findByPdfConvertStatus(PdfConvert pdfConvertStatus);
+
+  Page<StoredFile> findByPdfConvertStatus(PdfConvert pdfConvertStatus, Pageable pageable);
 }

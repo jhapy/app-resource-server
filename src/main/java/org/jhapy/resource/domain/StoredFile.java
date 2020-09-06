@@ -18,6 +18,8 @@
 
 package org.jhapy.resource.domain;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -39,9 +41,17 @@ public class StoredFile extends BaseEntity {
   private long filesize;
 
   private byte[] content;
+  private byte[] md5Content;
+
   private byte[] orginalContent;
 
+  @Enumerated(EnumType.STRING)
+  private PdfConvert pdfConvertStatus;
+  private byte[] pdfContent;
+
   private float zoom;
+
+  private String copperData;
 
   private Long relatedObjectId;
   private String relatedObjectClass;
