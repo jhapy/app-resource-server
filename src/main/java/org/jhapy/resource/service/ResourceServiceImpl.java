@@ -210,6 +210,17 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
       if (storedFile.getMimeType().contains("pdf") || storedFile.getMimeType().startsWith("image")) {
         storedFile.setPdfConvertStatus(PdfConvert.NOT_NEEDED);
       } else {
+        GridFSFile file = operations
+            .findOne(new Query(Criteria.where("_id").is(storedFile.getContentFileId())));
+        if ( file != null) {
+          try {
+            storedFile.setContent(operations.getResource( file ).getContent().readAllBytes());
+          } catch (IOException e) {
+            logger().error(loggerPrefix+"Cannot get file content : "  + e.getMessage());
+          }
+        } else {
+          logger().error(loggerPrefix+"GridFS pdf file not found");
+        }
         byte[] converted = convertToPdf(storedFile);
         if (converted == null) {
           storedFile.setPdfConvertStatus(PdfConvert.NOT_SUPPORTED);
