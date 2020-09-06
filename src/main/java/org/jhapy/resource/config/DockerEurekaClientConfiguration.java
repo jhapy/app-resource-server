@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.net.util.SubnetUtils;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.SpringProfileConstants;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
@@ -39,7 +38,6 @@ import org.springframework.cloud.netflix.eureka.metadata.ManagementMetadataProvi
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
 

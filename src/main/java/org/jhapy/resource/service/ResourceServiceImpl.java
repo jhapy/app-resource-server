@@ -49,7 +49,8 @@ import org.springframework.util.DigestUtils;
 @Service
 @Transactional(readOnly = true)
 public class ResourceServiceImpl implements ResourceService, HasLogger {
-private final AppProperties appProperties;
+
+  private final AppProperties appProperties;
   private final StoredFileRepository storedFileRepository;
 
   public ResourceServiceImpl(
@@ -80,7 +81,7 @@ private final AppProperties appProperties;
   @Override
   public StoredFile getByIdNoContent(String id) {
     StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
-    if ( storedFile != null ) {
+    if (storedFile != null) {
       storedFile.setContent(null);
       storedFile.setPdfContent(null);
       storedFile.setOrginalContent(null);
@@ -93,7 +94,7 @@ private final AppProperties appProperties;
   @Override
   public StoredFile getByIdPdfContent(String id) {
     StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
-    if ( storedFile != null ) {
+    if (storedFile != null) {
       storedFile.setContent(null);
       storedFile.setOrginalContent(null);
       return storedFile;
@@ -103,34 +104,42 @@ private final AppProperties appProperties;
   }
 
   // Every minutes
-  @Scheduled( fixedRate = 60000)
+  @Scheduled(fixedRate = 60000)
   @Transactional
   protected void convertPdfs() {
     String loggerPrefix = getLoggerPrefix("convertPdfs");
     long start = System.currentTimeMillis();
-    logger().debug(loggerPrefix+"Starting to convert");
-    Page<StoredFile> storedFiles = storedFileRepository.findByPdfConvertStatus( PdfConvert.NOT_CONVERTED,
-        PageRequest.of(0, 100));
-    logger().debug(loggerPrefix+storedFiles.getTotalElements() + " elements not converted, will convert " + storedFiles.getContent().size() + " documents");
+    logger().debug(loggerPrefix + "Starting to convert");
+    Page<StoredFile> storedFiles = storedFileRepository
+        .findByPdfConvertStatus(PdfConvert.NOT_CONVERTED,
+            PageRequest.of(0, 100));
+    logger().debug(
+        loggerPrefix + storedFiles.getTotalElements() + " elements not converted, will convert "
+            + storedFiles.getContent().size() + " documents");
     AtomicInteger nbConverted = new AtomicInteger();
     AtomicInteger nbNotSupported = new AtomicInteger();
-    storedFiles.getContent().forEach( storedFile -> {
+    storedFiles.getContent().forEach(storedFile -> {
       byte[] converted = convertToPdf(storedFile);
-      if ( converted == null ) {
+      if (converted == null) {
         storedFile.setPdfConvertStatus(PdfConvert.NOT_SUPPORTED);
         nbNotSupported.getAndIncrement();
       } else {
-        storedFile.setPdfContent( converted );
+        storedFile.setPdfContent(converted);
         storedFile.setPdfConvertStatus(PdfConvert.CONVERTED);
         nbConverted.getAndIncrement();
       }
-      if ( storedFile.getMd5Content() == null )
-        storedFile.setMd5Content( DigestUtils.md5Digest(storedFile.getContent()));
+      if (storedFile.getMd5Content() == null) {
+        storedFile.setMd5Content(DigestUtils.md5Digest(storedFile.getContent()));
+      }
     });
-    logger().debug(loggerPrefix+nbConverted.get()+" documents converted, " + nbNotSupported + " documentes not supported" );
-    logger().debug(loggerPrefix+"Save documents converted in " + ( System.currentTimeMillis() - start ) + " ms");
-    storedFileRepository.saveAll( storedFiles );
-    logger().debug(loggerPrefix+"Saved, total duration = " + ( System.currentTimeMillis() - start ) + " ms");
+    logger().debug(loggerPrefix + nbConverted.get() + " documents converted, " + nbNotSupported
+        + " documentes not supported");
+    logger().debug(
+        loggerPrefix + "Save documents converted in " + (System.currentTimeMillis() - start)
+            + " ms");
+    storedFileRepository.saveAll(storedFiles);
+    logger().debug(
+        loggerPrefix + "Saved, total duration = " + (System.currentTimeMillis() - start) + " ms");
   }
 
   @Override
@@ -139,15 +148,16 @@ private final AppProperties appProperties;
     if (entity == null) {
       throw new EntityNotFoundException();
     }
-    if ( entity.getContent() != null && entity.getContent().length > 0 ) {
-      if ( entity.getId() == null )
+    if (entity.getContent() != null && entity.getContent().length > 0) {
+      if (entity.getId() == null) {
         entity.setPdfConvertStatus(PdfConvert.NOT_CONVERTED);
-      if ( entity.getMd5Content() == null ) {
-        entity.setMd5Content( DigestUtils.md5Digest(entity.getContent()));
+      }
+      if (entity.getMd5Content() == null) {
+        entity.setMd5Content(DigestUtils.md5Digest(entity.getContent()));
       } else {
         byte[] md5 = DigestUtils.md5Digest(entity.getContent());
-        boolean contentChanged = Arrays.equals(entity.getMd5Content(),md5);
-        if ( contentChanged ) {
+        boolean contentChanged = Arrays.equals(entity.getMd5Content(), md5);
+        if (contentChanged) {
           entity.setPdfConvertStatus(PdfConvert.NOT_CONVERTED);
           entity.setPdfContent(null);
           entity.setMd5Content(md5);
@@ -162,16 +172,17 @@ private final AppProperties appProperties;
     return storedFileRepository.save(entity);
   }
 
-  private byte[] convertToPdf(StoredFile entity ) {
-    String loggerPrefix = getLoggerPrefix("convertToPdf", entity.getId(), entity.getFilename() );
-    if ( entity.getContent() == null || entity.getContent().length == 0 ) {
-      logger().warn(loggerPrefix+"Empty content, skip");
+  private byte[] convertToPdf(StoredFile entity) {
+    String loggerPrefix = getLoggerPrefix("convertToPdf", entity.getId(), entity.getFilename());
+    if (entity.getContent() == null || entity.getContent().length == 0) {
+      logger().warn(loggerPrefix + "Empty content, skip");
       return null;
     }
     byte[] fileContent = entity.getContent();
     String filename = entity.getFilename();
     if (!entity.getMimeType().contains("pdf") && !entity.getMimeType().startsWith("image")) {
-      String filenameNoExt = entity.getFilename().substring(0, entity.getFilename().lastIndexOf("."));
+      String filenameNoExt = entity.getFilename()
+          .substring(0, entity.getFilename().lastIndexOf("."));
       String ext = entity.getFilename().substring(entity.getFilename().lastIndexOf(".") + 1);
 
       File initialFile = null;
@@ -208,7 +219,7 @@ private final AppProperties appProperties;
 
           resultFile = Path.of(tmpDir.toString(), targetFile + ".pdf");
           fileContent = Files.readAllBytes(resultFile);
-          logger().debug(loggerPrefix+"Converted : " + entity.getMimeType());
+          logger().debug(loggerPrefix + "Converted : " + entity.getMimeType());
         } else {
           logger().error(loggerPrefix + "Cannot convert, exit code = " + exitCode);
 
@@ -254,7 +265,7 @@ private final AppProperties appProperties;
         }
       }
     } else {
-      logger().debug(loggerPrefix+"Image or PDF content, skip (" + entity.getMimeType() + ")");
+      logger().debug(loggerPrefix + "Image or PDF content, skip (" + entity.getMimeType() + ")");
       fileContent = null;
     }
     return fileContent;

@@ -68,7 +68,8 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
     String loggerPrefix = getLoggerPrefix("getByIdNoContent");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(resourceService
-          .getByIdNoContent(query.getId()), org.jhapy.dto.utils.StoredFile.class, getOrikaContext(query)));
+              .getByIdNoContent(query.getId()), org.jhapy.dto.utils.StoredFile.class,
+          getOrikaContext(query)));
     } catch (Throwable t) {
       return handleResult(loggerPrefix, t);
     }
@@ -79,7 +80,8 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
     String loggerPrefix = getLoggerPrefix("getByIdPdfContent");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(resourceService
-          .getByIdPdfContent(query.getId()), org.jhapy.dto.utils.StoredFile.class, getOrikaContext(query)));
+              .getByIdPdfContent(query.getId()), org.jhapy.dto.utils.StoredFile.class,
+          getOrikaContext(query)));
     } catch (Throwable t) {
       return handleResult(loggerPrefix, t);
     }
