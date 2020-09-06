@@ -29,7 +29,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.mapping.event.ValidatingMongoEventListener;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -51,6 +53,11 @@ public class DatabaseConfiguration implements HasLogger {
   @Bean
   public MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
     return new MongoTransactionManager(dbFactory);
+  }
+
+  @Bean
+  public GridFsTemplate gridFsTemplate(MongoDatabaseFactory dbFactory, MongoConverter converter) throws Exception {
+    return new GridFsTemplate(dbFactory, converter);
   }
 
   @Bean

@@ -41,13 +41,17 @@ public class StoredFile extends BaseEntity {
   private long filesize;
 
   private byte[] content;
+  private String contentFileId;
+
   private byte[] md5Content;
 
   private byte[] orginalContent;
+  private String originalContentFileId;
 
   @Enumerated(EnumType.STRING)
   private PdfConvert pdfConvertStatus;
   private byte[] pdfContent;
+  private String pdfContentFileId;
 
   private float zoom;
 

@@ -18,7 +18,11 @@
 
 package org.jhapy.resource.service;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.client.gridfs.model.GridFSFile;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,14 +32,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.bson.types.ObjectId;
 import org.jhapy.commons.config.AppProperties;
 import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.resource.domain.PdfConvert;
 import org.jhapy.resource.domain.StoredFile;
 import org.jhapy.resource.exception.EntityNotFoundException;
 import org.jhapy.resource.repository.StoredFileRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsObject;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,12 +64,17 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
 
   private final AppProperties appProperties;
   private final StoredFileRepository storedFileRepository;
+  private final GridFsOperations operations;
+  @Value("${jhapy.bootstrap.resourceService.migrateGridFs}")
+  private Boolean isMigrateGridFs;
 
   public ResourceServiceImpl(
       AppProperties appProperties,
-      StoredFileRepository storedFileRepository) {
+      StoredFileRepository storedFileRepository,
+      GridFsOperations operations) {
     this.appProperties = appProperties;
     this.storedFileRepository = storedFileRepository;
+    this.operations = operations;
   }
 
   @Override
@@ -70,12 +87,61 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
     if (entity == null) {
       throw new EntityNotFoundException();
     }
+    if ( entity.getContentFileId() != null )
+    operations.delete(new Query(Criteria.where("_id").is(entity.getContentFileId())));
+    if ( entity.getOriginalContentFileId() != null )
+      operations.delete(new Query(Criteria.where("_id").is(entity.getOriginalContentFileId())));
+      if ( entity.getPdfContentFileId() != null )
+        operations.delete(new Query(Criteria.where("_id").is(entity.getPdfContentFileId())));
     storedFileRepository.delete(entity);
   }
 
   @Override
   public StoredFile getById(String id) {
-    return storedFileRepository.findById(id).orElse(null);
+    String loggerPrefix = getLoggerPrefix("getById", id );
+
+    StoredFile storedFile =storedFileRepository.findById(id).orElse(null);
+    if ( storedFile != null ) {
+      if ( storedFile.getContentFileId() != null ) {
+        GridFSFile file = operations.findOne(new Query(Criteria.where("_id").is(storedFile.getContentFileId())));
+        if ( file != null) {
+          try {
+            storedFile.setContent(operations.getResource( file ).getContent().readAllBytes());
+          } catch (IOException e) {
+           logger().error(loggerPrefix+"Cannot get file content : "  + e.getMessage());
+          }
+        } else {
+          logger().error(loggerPrefix+"GridFS file not found");
+        }
+      }
+      if ( storedFile.getOriginalContentFileId() != null ) {
+        GridFSFile file = operations
+            .findOne(new Query(Criteria.where("_id").is(storedFile.getOriginalContentFileId())));
+        if ( file != null) {
+          try {
+            storedFile.setOrginalContent(operations.getResource( file ).getContent().readAllBytes());
+          } catch (IOException e) {
+            logger().error(loggerPrefix+"Cannot get original file content : "  + e.getMessage());
+          }
+        } else {
+          logger().error(loggerPrefix+"GridFS original file not found");
+        }
+      }
+      if ( storedFile.getPdfContentFileId() != null ) {
+          GridFSFile file = operations
+              .findOne(new Query(Criteria.where("_id").is(storedFile.getPdfContentFileId())));
+          if ( file != null) {
+            try {
+              storedFile.setPdfContent(operations.getResource( file ).getContent().readAllBytes());
+            } catch (IOException e) {
+              logger().error(loggerPrefix+"Cannot get pdf file content : "  + e.getMessage());
+            }
+          } else {
+            logger().error(loggerPrefix+"GridFS pdf file not found");
+          }
+      }
+    }
+    return storedFile;
   }
 
   @Override
@@ -93,10 +159,27 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
 
   @Override
   public StoredFile getByIdPdfContent(String id) {
+    String loggerPrefix = getLoggerPrefix("getByIdPdfContent", id );
+
     StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
     if (storedFile != null) {
       storedFile.setContent(null);
       storedFile.setOrginalContent(null);
+
+      if ( storedFile.getPdfContentFileId() != null ) {
+        GridFSFile file = operations
+            .findOne(new Query(Criteria.where("_id").is(storedFile.getPdfContentFileId())));
+        if ( file != null) {
+          try {
+            storedFile.setPdfContent(operations.getResource( file ).getContent().readAllBytes());
+          } catch (IOException e) {
+            logger().error(loggerPrefix+"Cannot get pdf file content : "  + e.getMessage());
+          }
+        } else {
+          logger().error(loggerPrefix+"GridFS pdf file not found");
+        }
+      }
+
       return storedFile;
     } else {
       return null;
@@ -119,14 +202,25 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
     AtomicInteger nbConverted = new AtomicInteger();
     AtomicInteger nbNotSupported = new AtomicInteger();
     storedFiles.getContent().forEach(storedFile -> {
-      byte[] converted = convertToPdf(storedFile);
-      if (converted == null) {
-        storedFile.setPdfConvertStatus(PdfConvert.NOT_SUPPORTED);
-        nbNotSupported.getAndIncrement();
+      if (!storedFile.getMimeType().contains("pdf") && !storedFile.getMimeType().startsWith("image")) {
+        storedFile.setPdfConvertStatus(PdfConvert.NOT_NEEDED);
       } else {
-        storedFile.setPdfContent(converted);
-        storedFile.setPdfConvertStatus(PdfConvert.CONVERTED);
-        nbConverted.getAndIncrement();
+        byte[] converted = convertToPdf(storedFile);
+        if (converted == null) {
+          storedFile.setPdfConvertStatus(PdfConvert.NOT_SUPPORTED);
+          nbNotSupported.getAndIncrement();
+        } else {
+          // storedFile.setPdfContent(converted);
+          storedFile.setPdfConvertStatus(PdfConvert.CONVERTED);
+          DBObject fileMetaData = new BasicDBObject();
+          fileMetaData.put("relatedObjectId", storedFile.getId());
+          ObjectId objectId = operations.store(new ByteArrayInputStream(storedFile.getPdfContent()),
+              storedFile.getId() + "-" + replaceExtension(storedFile.getFilename(), "pdf"),
+              "application/pdf", fileMetaData);
+          storedFile.setPdfContentFileId(objectId.toString());
+
+          nbConverted.getAndIncrement();
+        }
       }
       if (storedFile.getMd5Content() == null && storedFile.getContent() != null) {
         storedFile.setMd5Content(DigestUtils.md5Digest(storedFile.getContent()));
@@ -140,6 +234,24 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
     storedFileRepository.saveAll(storedFiles);
     logger().debug(
         loggerPrefix + "Saved, total duration = " + (System.currentTimeMillis() - start) + " ms");
+  }
+
+  @Transactional
+  @EventListener(ApplicationReadyEvent.class)
+  protected void postLoad() {
+    if ( isMigrateGridFs )
+    migrateGridFS();
+  }
+
+  @Override
+  @Transactional
+  public void migrateGridFS() {
+    String loggerPrefix = getLoggerPrefix("migrateGridFS");
+
+    logger().debug(loggerPrefix+"Start migration");
+    List<StoredFile> allFiles = storedFileRepository.findAll();
+    allFiles.forEach( storedFile -> save(storedFile));
+    logger().debug(loggerPrefix+"End migration");
   }
 
   @Override
@@ -164,12 +276,51 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
         }
       }
     } else {
-      entity.setPdfConvertStatus(PdfConvert.NOT_SUPPORTED);
+      entity.setPdfConvertStatus(PdfConvert.NOT_NEEDED);
       entity.setPdfContent(null);
       entity.setMd5Content(null);
     }
 
-    return storedFileRepository.save(entity);
+    byte[] content = entity.getContent();
+    byte[] originalContent = entity.getOrginalContent();
+    byte[] pdfContent = entity.getPdfContent();
+
+    entity.setContent(null);
+    entity.setOrginalContent(null);
+    entity.setPdfContent(null);
+
+    StoredFile savedEntity = storedFileRepository.save(entity);
+
+    DBObject fileMetaData = new BasicDBObject();
+    fileMetaData.put("relatedObjectId", savedEntity.getId());
+
+    if ( content != null ) {
+      ObjectId objectId = operations.store(new ByteArrayInputStream(content),
+          savedEntity.getId() + "-" + entity.getFilename(), entity.getMimeType(), fileMetaData);
+      entity.setContentFileId(objectId.toString());
+    }
+    if ( originalContent != null ) {
+      ObjectId objectId = operations.store(new ByteArrayInputStream(originalContent),
+          savedEntity.getId() + "-o-" + entity.getFilename(), entity.getMimeType(), fileMetaData);
+      entity.setOriginalContentFileId(objectId.toString());
+    }
+    if ( pdfContent != null ) {
+      ObjectId objectId = operations.store(new ByteArrayInputStream(pdfContent),
+          savedEntity.getId() + "-" + replaceExtension(entity.getFilename(), "pdf"), "application/pdf", fileMetaData);
+      entity.setPdfContentFileId(objectId.toString());
+    }
+
+    savedEntity = storedFileRepository.save(entity);
+
+    return savedEntity;
+  }
+
+  private String replaceExtension( String filename, String newExt ) {
+    int i = filename.lastIndexOf('.');
+    if ( i == -1 )
+      return filename+"."+newExt;
+    else
+      return filename.substring(0, i ) + "." + newExt;
   }
 
   private byte[] convertToPdf(StoredFile entity) {
@@ -179,10 +330,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
       return null;
     }
     byte[] fileContent = entity.getContent();
-    String filename = entity.getFilename();
     if (!entity.getMimeType().contains("pdf") && !entity.getMimeType().startsWith("image")) {
-      String filenameNoExt = entity.getFilename()
-          .substring(0, entity.getFilename().lastIndexOf("."));
       String ext = entity.getFilename().substring(entity.getFilename().lastIndexOf(".") + 1);
 
       File initialFile = null;

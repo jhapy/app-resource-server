@@ -36,4 +36,7 @@ public interface ResourceService {
   StoredFile getByIdNoContent(String id);
 
   StoredFile getByIdPdfContent(String id);
+
+  void migrateGridFS();
+
 }
