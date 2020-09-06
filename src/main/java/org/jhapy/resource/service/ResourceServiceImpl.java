@@ -100,9 +100,10 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
   public StoredFile getById(String id) {
     String loggerPrefix = getLoggerPrefix("getById", id );
 
-    StoredFile storedFile =storedFileRepository.findById(id).orElse(null);
+    StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
     if ( storedFile != null ) {
       if ( storedFile.getContentFileId() != null ) {
+        logger().debug(loggerPrefix+"Get Content file" );
         GridFSFile file = operations.findOne(new Query(Criteria.where("_id").is(storedFile.getContentFileId())));
         if ( file != null) {
           try {
@@ -115,6 +116,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
         }
       }
       if ( storedFile.getOriginalContentFileId() != null ) {
+        logger().debug(loggerPrefix+"Get Original Content file" );
         GridFSFile file = operations
             .findOne(new Query(Criteria.where("_id").is(storedFile.getOriginalContentFileId())));
         if ( file != null) {
@@ -128,6 +130,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
         }
       }
       if ( storedFile.getPdfContentFileId() != null ) {
+        logger().debug(loggerPrefix+"Get Pdf Content file" );
           GridFSFile file = operations
               .findOne(new Query(Criteria.where("_id").is(storedFile.getPdfContentFileId())));
           if ( file != null) {
