@@ -38,20 +38,20 @@
     <spring-cloud.version>Hoxton.SR7</spring-cloud.version>
     <spring-data.version>Neumann-SR3</spring-data.version>
 
-    <problem-spring-web.version>0.25.2</problem-spring-web.version>
-    <micrometer-core.version>1.5.1</micrometer-core.version>
-    <micrometer-registry-prometheus.version>1.5.1</micrometer-registry-prometheus.version>
+    <problem-spring-web.version>0.26.0</problem-spring-web.version>
+    <micrometer-core.version>1.5.4</micrometer-core.version>
+    <micrometer-registry-prometheus.version>1.5.4</micrometer-registry-prometheus.version>
     <metrics-core.version>4.1.9</metrics-core.version>
-    <logstash-logback-encoder.version>6.3</logstash-logback-encoder.version>
+    <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
 
     <mongobee.version>0.13</mongobee.version>
 
-    <commons-io.version>2.6</commons-io.version>
+    <commons-io.version>2.7</commons-io.version>
 
-    <logstash-gelf.version>1.13.0</logstash-gelf.version>
+    <logstash-gelf.version>1.14.1</logstash-gelf.version>
     <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
 
-    <javers-spring-boot-starter-mongo.version>5.9.2</javers-spring-boot-starter-mongo.version>
+    <javers-spring-boot-starter-mongo.version>5.11.2</javers-spring-boot-starter-mongo.version>
 
 
   </properties>
@@ -123,12 +123,12 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.4.1</version>
+      <version>1.4.6</version>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-security</artifactId>
-      <version>1.4.1</version>
+      <version>1.4.6</version>
     </dependency>
 
     <dependency>
