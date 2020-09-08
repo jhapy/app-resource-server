@@ -18,6 +18,8 @@
 
 package org.jhapy.resource.domain;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import lombok.Data;
@@ -33,11 +35,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "storedFile")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true, exclude = {"content", "orginalContent"})
+@ToString(callSuper = true, exclude = {"content", "orginalContent", "pdfContent"})
 public class StoredFile extends BaseEntity {
 
   private String filename;
+
   private String mimeType;
+
   private long filesize;
 
   private byte[] content;
@@ -53,9 +57,7 @@ public class StoredFile extends BaseEntity {
   private byte[] pdfContent;
   private String pdfContentFileId;
 
-  private float zoom;
-
-  private String copperData;
+  private Map<String,String> metadata = new HashMap<>();
 
   private Long relatedObjectId;
   private String relatedObjectClass;

@@ -219,7 +219,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
             logger().error(loggerPrefix+"Cannot get file content : "  + e.getMessage());
           }
         } else {
-          logger().error(loggerPrefix+"GridFS pdf file not found");
+          logger().error(loggerPrefix+"GridFS file not found");
         }
         byte[] converted = convertToPdf(storedFile);
         if (converted == null) {
