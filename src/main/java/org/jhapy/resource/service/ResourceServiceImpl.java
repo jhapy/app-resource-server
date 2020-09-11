@@ -102,6 +102,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
 
     StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
     if ( storedFile != null ) {
+      loggerPrefix = getLoggerPrefix("getById", id, storedFile.getFilename() );
       if ( storedFile.getContentFileId() != null ) {
         logger().debug(loggerPrefix+"Get Content file" );
         GridFSFile file = operations.findOne(new Query(Criteria.where("_id").is(storedFile.getContentFileId())));
@@ -112,7 +113,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
            logger().error(loggerPrefix+"Cannot get file content : "  + e.getMessage());
           }
         } else {
-          logger().error(loggerPrefix+"GridFS file not found");
+          logger().error(loggerPrefix+"GridFS file not found : "  + storedFile.getFilename());
         }
       }
       if ( storedFile.getOriginalContentFileId() != null ) {
@@ -207,6 +208,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
     AtomicInteger nbConverted = new AtomicInteger();
     AtomicInteger nbNotSupported = new AtomicInteger();
     storedFiles.getContent().forEach(storedFile -> {
+      String loggerPrefixLoop = getLoggerPrefix("convertPdfs.loop",storedFile.getId(), storedFile.getFilename() );
       if (storedFile.getMimeType().contains("pdf") || storedFile.getMimeType().startsWith("image")) {
         storedFile.setPdfConvertStatus(PdfConvert.NOT_NEEDED);
       } else {
@@ -216,10 +218,10 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
           try {
             storedFile.setContent(operations.getResource( file ).getContent().readAllBytes());
           } catch (IOException e) {
-            logger().error(loggerPrefix+"Cannot get file content : "  + e.getMessage());
+            logger().error(loggerPrefixLoop+"Cannot get file content : "  + e.getMessage());
           }
         } else {
-          logger().error(loggerPrefix+"GridFS file not found");
+          logger().error(loggerPrefixLoop+"GridFS file not found");
         }
         byte[] converted = convertToPdf(storedFile);
         if (converted == null) {
@@ -230,7 +232,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
           storedFile.setPdfConvertStatus(PdfConvert.CONVERTED);
           DBObject fileMetaData = new BasicDBObject();
           fileMetaData.put("relatedObjectId", storedFile.getId());
-          ObjectId objectId = operations.store(new ByteArrayInputStream(storedFile.getPdfContent()),
+          ObjectId objectId = operations.store(new ByteArrayInputStream(converted),
               storedFile.getId() + "-" + replaceExtension(storedFile.getFilename(), "pdf"),
               "application/pdf", fileMetaData);
           storedFile.setPdfContentFileId(objectId.toString());
