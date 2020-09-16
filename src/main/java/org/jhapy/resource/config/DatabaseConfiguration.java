@@ -56,7 +56,8 @@ public class DatabaseConfiguration implements HasLogger {
   }
 
   @Bean
-  public GridFsTemplate gridFsTemplate(MongoDatabaseFactory dbFactory, MongoConverter converter) throws Exception {
+  public GridFsTemplate gridFsTemplate(MongoDatabaseFactory dbFactory, MongoConverter converter)
+      throws Exception {
     return new GridFsTemplate(dbFactory, converter);
   }
 

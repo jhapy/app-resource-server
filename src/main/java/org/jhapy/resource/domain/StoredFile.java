@@ -57,7 +57,7 @@ public class StoredFile extends BaseEntity {
   private byte[] pdfContent;
   private String pdfContentFileId;
 
-  private Map<String,String> metadata = new HashMap<>();
+  private Map<String, String> metadata = new HashMap<>();
 
   private Long relatedObjectId;
   private String relatedObjectClass;
