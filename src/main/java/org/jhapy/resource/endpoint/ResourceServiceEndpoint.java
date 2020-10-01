@@ -39,9 +39,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2019-06-05
  */
 
-@CrossOrigin("http://localhost:4200")
 @RestController
-@RequestMapping("/resourceService")
+@RequestMapping("/api/resourceService")
 public class ResourceServiceEndpoint extends BaseEndpoint {
 
   private final ResourceService resourceService;
