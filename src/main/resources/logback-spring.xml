@@ -49,7 +49,7 @@
   <springProfile name="local">
     <logger level="DEBUG" name="org.jhapy"/>
     <logger level="INFO" name="org.springframework"/>
-
+    <logger level="DEBUG" name="io.swagger.v3"/>
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
     </root>
