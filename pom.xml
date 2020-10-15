@@ -21,7 +21,7 @@
   <name>jHapy Framework - Resource Server</name>
 
   <properties>
-    <java.version>14</java.version>
+    <java.version>15</java.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -34,6 +34,7 @@
     <sonar-maven-plugin.version>3.6.1.1688</sonar-maven-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
+    <lombok.version>1.18.14</lombok.version>
 
     <spring-cloud.version>Hoxton.SR7</spring-cloud.version>
     <spring-data.version>Neumann-SR3</spring-data.version>
@@ -188,6 +189,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
