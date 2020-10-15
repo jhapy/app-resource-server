@@ -1,4 +1,4 @@
-FROM openjdk:14-jdk-slim-buster
+FROM openjdk:15-jdk-slim-buster
 
 MAINTAINER jHapy Lead Dev <jhapy@jhapy.org>
 
