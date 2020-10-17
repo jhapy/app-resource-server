@@ -26,7 +26,7 @@
     </appender>
   </springProfile>
 
-  <springProfile name="dev,test,staging">
+  <springProfile name="dev,test,staging,k8s-test">
     <logger level="DEBUG" name="org.jhapy"/>
     <logger level="INFO" name="org.springframework"/>
 
@@ -46,7 +46,7 @@
     </root>
   </springProfile>
 
-  <springProfile name="local">
+  <springProfile name="local,k8s-local">
     <logger level="DEBUG" name="org.jhapy"/>
     <logger level="INFO" name="org.springframework"/>
     <logger level="DEBUG" name="io.swagger.v3"/>

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.net.util.SubnetUtils;
 import org.jhapy.commons.utils.HasLogger;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
@@ -43,12 +44,15 @@ import org.springframework.util.StringUtils;
 
 
 @Configuration
+@ConditionalOnProperty(value = "spring.cloud.kubernetes.enabled",matchIfMissing = false)
 public class DockerEurekaClientConfiguration implements
     HasLogger {
 
   private final ConfigurableEnvironment env;
 
   public DockerEurekaClientConfiguration(ConfigurableEnvironment env) {
+    String loggerPrefix = getLoggerPrefix("DockerEurekaClientConfiguration");
+    logger().info(loggerPrefix + "Startup");
     this.env = env;
   }
 

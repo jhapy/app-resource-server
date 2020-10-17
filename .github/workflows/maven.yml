@@ -1,9 +1,8 @@
-name: Java CI
+name: JHapy App Resource Server CI
 
 on:
   push:
-  repository_dispatch:
-    types: [shared-commons-build]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: app-resource-server

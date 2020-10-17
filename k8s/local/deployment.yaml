@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-resource-server
+  labels:
+    tier: backend
+  namespace: thothee-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-resource-server
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: app-resource-server
+        tier: backend
+    spec:
+      containers:
+        - name: app-resource-server
+          image: app-resource-server
+          env:
+            - name: JAVA_OPTS
+              value: '-Xmx256m -Xms256m -Dspring.cloud.config.uri=http://admin:admin@utils-registry-server.thothee-local.svc.cluster.local:8888/config -Djhapy.registry.password=admin'
+            - name: jhapy.registry.password
+              value: admin
+            - name: SERVER_NAME
+              value: '{{.Node.Hostname}}-{{.Node.ID}}'
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '500m'
+            limits:
+              memory: '1Gi'
+              cpu: '1'
+          ports:
+            - name: http
+              containerPort: 9005
+            - name: management
+              containerPort: 9105
+#          readinessProbe:
+#            httpGet:
+#              path: /management/health
+#              port: management
+#            initialDelaySeconds: 20
+#            periodSeconds: 15
+#            failureThreshold: 6
+#          livenessProbe:
+#            httpGet:
+#              path: /management/health
+#              port: management
+#            initialDelaySeconds: 120
+#          startupProbe:
+#            httpGet:
+#              path: /management/health
+#              port: management
+#            failureThreshold: 30
+#            periodSeconds: 10
