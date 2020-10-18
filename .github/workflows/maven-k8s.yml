@@ -30,36 +30,10 @@ jobs:
           key: ${{ runner.os }}-maven-app-resource-server
           restore-keys: |
             ${{ runner.os }}-maven-app-resource-server
-      - name: Build with Maven
-        run: mvn -Pk8s -Dmaven.test.skip -s .settings.xml -Dmaven.javadoc.skip -Dossrh_username=${{secrets.ossrh_username}} -Dossrh_password=${{secrets.ossrh_password}} --file pom.xml deploy
-
-      - name: Build Docker Image
-        run: docker build . --file Dockerfile --tag image
-
       - name: Log into Docker Hub Registry
         run: echo "${{ secrets.dockerhub_password }}" | docker login --username jhapy  --password-stdin
-
-      - name: Push image to Docker Hub Registry
-        run: |
-          IMAGE_ID=jhapy/$IMAGE_NAME
-
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-
-          docker tag image $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+      - name: Build with Maven
+        run: mvn -Pk8s -Dmaven.test.skip -s .settings.xml -Dmaven.javadoc.skip -Dossrh_username=${{secrets.ossrh_username}} -Dossrh_password=${{secrets.ossrh_password}} --file pom.xml deploy jib:build
       - name: Slack Success
         uses: 8398a7/action-slack@v3
         with:
