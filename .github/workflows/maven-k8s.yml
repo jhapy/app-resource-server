@@ -30,6 +30,8 @@ jobs:
           key: ${{ runner.os }}-maven-app-resource-server
           restore-keys: |
             ${{ runner.os }}-maven-app-resource-server
+      - name: Clean Maven Repository
+        run: rm -rf ~/.m2/repository/org/jhapy
       - name: Log into Docker Hub Registry
         run: echo "${{ secrets.dockerhub_password }}" | docker login --username ${{ secrets.dockerhub_username }} --password-stdin
       - name: Build with Maven

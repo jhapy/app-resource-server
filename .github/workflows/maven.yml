@@ -30,6 +30,8 @@ jobs:
           key: ${{ runner.os }}-maven-app-resource-server
           restore-keys: |
             ${{ runner.os }}-maven-app-resource-server
+      - name: Clean Maven Repository
+        run: rm -rf ~/.m2/repository/org/jhapy
       - name: Build with Maven
         run: mvn -Dmaven.test.skip -s .settings.xml -Dmaven.javadoc.skip -Dossrh_username=${{secrets.ossrh_username}} -Dossrh_password=${{secrets.ossrh_password}} --file pom.xml deploy
 
