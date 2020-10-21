@@ -18,10 +18,12 @@
 
 package org.jhapy.resource;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.jhapy.commons.config.AppProperties;
 import org.jhapy.commons.utils.DefaultProfileUtil;
@@ -54,9 +56,11 @@ public class Application implements InitializingBean {
   private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
   private final Environment env;
+  private final AppProperties appProperties;
 
-  public Application(Environment env) {
+  public Application(Environment env, AppProperties appProperties) {
     this.env = env;
+    this.appProperties = appProperties;
   }
 
   public static void main(String[] args) {
@@ -113,6 +117,49 @@ public class Application implements InitializingBean {
         .contains(SpringProfileConstants.SPRING_PROFILE_PRODUCTION)) {
       logger.error("You have misconfigured your application! It should not run " +
           "with both the 'dev' and 'prod' profiles at the same time.");
+    }
+  }
+
+  @PostConstruct
+  void postConstruct() {
+    if (StringUtils.isNotBlank(appProperties.getSecurity().getTrustStore().getTrustStorePath())) {
+      File trustStoreFilePath = new File(
+          appProperties.getSecurity().getTrustStore().getTrustStorePath());
+      String tsp = trustStoreFilePath.getAbsolutePath();
+      logger.info("Use trustStore " + tsp + ", with password : " + appProperties.getSecurity()
+          .getTrustStore().getTrustStorePassword() + ", with type : " + appProperties.getSecurity()
+          .getTrustStore()
+          .getTrustStoreType());
+
+      System.setProperty("javax.net.ssl.trustStore", tsp);
+      System.setProperty("javax.net.ssl.trustStorePassword",
+          appProperties.getSecurity().getTrustStore().getTrustStorePassword());
+      if (StringUtils.isNotBlank(appProperties.getSecurity().getTrustStore().getTrustStoreType())) {
+        System.setProperty("javax.net.ssl.trustStoreType",
+            appProperties.getSecurity().getTrustStore().getTrustStoreType());
+      }
+    }
+    if (StringUtils.isNotBlank(appProperties.getSecurity().getKeyStore().getKeyStorePath())) {
+      File keyStoreFilePath = new File(appProperties.getSecurity().getKeyStore().getKeyStorePath());
+      String ksp = keyStoreFilePath.getAbsolutePath();
+      logger.info(
+          "Use keyStore " + ksp + ", with password : " + appProperties.getSecurity().getKeyStore()
+              .getKeyStorePassword() + ", with type : " + appProperties.getSecurity().getKeyStore()
+              .getKeyStoreType());
+
+      System.setProperty("javax.net.ssl.keyStore", ksp);
+      System.setProperty("javax.net.ssl.keyStorePassword",
+          appProperties.getSecurity().getKeyStore().getKeyStorePassword());
+      if (StringUtils.isNotBlank(appProperties.getSecurity().getKeyStore().getKeyStoreType())) {
+        System.setProperty("javax.net.ssl.keyStoreType",
+            appProperties.getSecurity().getKeyStore().getKeyStoreType());
+      }
+    }
+    if (appProperties.getSecurity().getTrustStore().getDebug() != null
+        || appProperties.getSecurity().getKeyStore().getDebug() != null) {
+      System.setProperty("javax.net.debug",
+          Boolean.toString(appProperties.getSecurity().getTrustStore().getDebug() != null
+              || appProperties.getSecurity().getKeyStore().getDebug() != null));
     }
   }
 }
