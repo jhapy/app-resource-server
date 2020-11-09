@@ -63,6 +63,7 @@ public class WebConfigurer implements ServletContextInitializer {
     CorsConfiguration config = appProperties.getCors();
     if (config.getAllowedOrigins() != null && !config.getAllowedOrigins().isEmpty()) {
       log.debug("Registering CORS filter");
+      source.registerCorsConfiguration("/resource/api/**", config);
       source.registerCorsConfiguration("/api/**", config);
       source.registerCorsConfiguration("/management/**", config);
       source.registerCorsConfiguration("/v2/api-docs", config);
