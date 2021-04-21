@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.3.7.RELEASE</version>
+    <version>2.3.10.RELEASE</version>
     <relativePath/>
   </parent>
 
@@ -21,50 +21,55 @@
   <name>jHapy Framework - Resource Server</name>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>15</java.version>
     <maven.version>3.6.0</maven.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
-    <spring-boot-admin.version>2.3.1</spring-boot-admin.version>
-
     <docker-base-image-name>jhapy/base-image-slim-ooffice:1.0</docker-base-image-name>
     <docker-target-image-name>jhapy/app-resource-server:v2</docker-target-image-name>
+
+    <!--suppress UnresolvedMavenProperty -->
+    <version.number>${git.commit.time}.${git.commit.id.abbrev}</version.number>
 
     <!-- These remain empty unless the corresponding profile is active -->
     <profile.swagger/>
     <profile.tls/>
 
-    <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
-    <spring-boot-admin.version>2.3.1</spring-boot-admin.version>
+    <spring-boot.version>2.3.10.RELEASE</spring-boot.version>
+    <spring-cloud.version>Hoxton.SR10</spring-cloud.version>
+    <spring-data.version>2021.0.0</spring-data.version>
+
+    <spring-boot-admin.version>2.4.1</spring-boot-admin.version>
+
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven.required.version>3.6</maven.required.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-    <sonar-maven-plugin.version>3.6.1.1688</sonar-maven-plugin.version>
-    <jib-maven-plugin.version>2.6.0</jib-maven-plugin.version>
+    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+    <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+    <sonar-maven-plugin.version>3.8.0.2131</sonar-maven-plugin.version>
+    <jib-maven-plugin.version>3.0.0</jib-maven-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
-    <lombok.version>1.18.18</lombok.version>
+    <dependency-check-maven.version>6.1.5</dependency-check-maven.version>
+    <git-commit-id-plugin.version>4.0.4</git-commit-id-plugin.version>
 
-    <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
-    <spring-data.version>2020.0.2</spring-data.version>
-
-    <javamelody.version>1.85.0</javamelody.version>
+    <lombok.version>1.18.20</lombok.version>
+    <javamelody.version>1.87.0</javamelody.version>
     <problem-spring-web.version>0.26.2</problem-spring-web.version>
-    <micrometer-core.version>1.5.5</micrometer-core.version>
-    <micrometer-registry-prometheus.version>1.5.5</micrometer-registry-prometheus.version>
-    <metrics-core.version>4.1.12.1</metrics-core.version>
-    <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
+    <micrometer-core.version>1.6.6</micrometer-core.version>
+    <micrometer-registry-prometheus.version>1.6.6</micrometer-registry-prometheus.version>
+    <metrics-core.version>4.1.19</metrics-core.version>
+    <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
     <logstash-gelf.version>1.14.1</logstash-gelf.version>
-    <springdoc-openapi-ui.version>1.4.8</springdoc-openapi-ui.version>
-    <commons-io.version>2.7</commons-io.version>
-    <problem-spring-web.version>0.26.2</problem-spring-web.version>
+    <springdoc-openapi-ui.version>1.5.7</springdoc-openapi-ui.version>
+    <commons-io.version>2.8.0</commons-io.version>
+    <freemarker.version>2.3.31</freemarker.version>
 
-    <mongock.version>4.1.17</mongock.version>
+    <mongock.version>4.1.19</mongock.version>
     <mongodb.driver-sync.version>4.0.5</mongodb.driver-sync.version>
-    <mongodb.spring-data.v3.version>3.0.3.RELEASE</mongodb.spring-data.v3.version>
+    <mongodb.spring-data.v3.version>3.0.6.RELEASE</mongodb.spring-data.v3.version>
   </properties>
 
   <dependencies>
@@ -198,16 +203,15 @@
       <artifactId>mongodb-springdata-v3-driver</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-mongodb</artifactId>
-      <version>${mongodb.spring-data.v3.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
       <version>${mongodb.driver-sync.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-mongodb</artifactId>
+      <version>${mongodb.spring-data.v3.version}</version>
+    </dependency>
     <!-- Utils dependencies -->
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -251,6 +255,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -313,12 +321,14 @@
           <version>${git-commit-id-plugin.version}</version>
           <executions>
             <execution>
+              <phase>validate</phase>
               <goals>
                 <goal>revision</goal>
               </goals>
             </execution>
           </executions>
           <configuration>
+            <dateFormat>yyyyMMdd-HHmmss</dateFormat>
             <failOnNoGitDirectory>false</failOnNoGitDirectory>
             <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
             <generateGitPropertiesFile>true</generateGitPropertiesFile>
@@ -356,6 +366,7 @@
               </environment>
               <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
             </container>
+            <allowInsecureRegistries>true</allowInsecureRegistries>
             <extraDirectories>
               <paths>src/main/jib</paths>
               <permissions>
@@ -427,6 +438,29 @@
             <jvmArguments>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArguments>
             -->
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>${nexus-staging-maven-plugin.version}</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>${dependency-check-maven.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -549,4 +583,24 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <linksource>true</linksource>
+          <sourcepath>target/delombok</sourcepath>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
