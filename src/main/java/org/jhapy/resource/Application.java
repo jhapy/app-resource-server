@@ -48,7 +48,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableConfigurationProperties(AppProperties.class)
-@EnableCircuitBreaker
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @ComponentScan({"org.jhapy.resource", "org.jhapy.commons"})
 public class Application implements InitializingBean {
