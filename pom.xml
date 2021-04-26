@@ -46,7 +46,7 @@
 
     <mongobee.version>0.13</mongobee.version>
 
-    <commons-io.version>2.6</commons-io.version>
+    <commons-io.version>2.7</commons-io.version>
 
     <logstash-gelf.version>1.13.0</logstash-gelf.version>
     <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
