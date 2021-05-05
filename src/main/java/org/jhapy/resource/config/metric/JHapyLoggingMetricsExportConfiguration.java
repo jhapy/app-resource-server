@@ -74,7 +74,7 @@ public class JHapyLoggingMetricsExportConfiguration implements HasLogger {
    */
   @Bean
   public Slf4jReporter consoleReporter(MetricRegistry dropwizardRegistry) {
-    String loggerPrefix = getLoggerPrefix("consoleReporter");
+    var loggerPrefix = getLoggerPrefix("consoleReporter");
     logger().info(loggerPrefix + "Initializing Metrics Log reporting");
     Marker metricsMarker = MarkerFactory.getMarker("metrics");
     final Slf4jReporter reporter = Slf4jReporter.forRegistry(dropwizardRegistry)

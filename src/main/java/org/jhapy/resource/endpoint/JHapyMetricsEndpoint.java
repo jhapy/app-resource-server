@@ -140,14 +140,14 @@ public class JHapyMetricsEndpoint {
         counter -> resultsGarbageCollector.put(counter.getId().getName(), counter.count()));
 
     gauges = Search.in(this.meterRegistry).name(s -> s.contains("jvm.classes.loaded")).gauges();
-    Double classesLoaded = gauges.stream().map(Gauge::value).reduce((x, y) -> (x + y))
+    Double classesLoaded = gauges.stream().map(Gauge::value).reduce(Double::sum)
         .orElse((double) 0);
     resultsGarbageCollector.put("classesLoaded", classesLoaded);
 
     Collection<FunctionCounter> functionCounters = Search.in(this.meterRegistry)
         .name(s -> s.contains("jvm.classes.unloaded")).functionCounters();
     Double classesUnloaded = functionCounters.stream().map(FunctionCounter::count)
-        .reduce((x, y) -> (x + y)).orElse((double) 0);
+        .reduce(Double::sum).orElse((double) 0);
     resultsGarbageCollector.put("classesUnloaded", classesUnloaded);
 
     return resultsGarbageCollector;
@@ -202,13 +202,13 @@ public class JHapyMetricsEndpoint {
 
         Collection<Timer> httpTimersStream = this.meterRegistry.find("http.server.requests")
             .tags("uri", uri, "method", operation).timers();
-        long count = httpTimersStream.stream().map(Timer::count).reduce((x, y) -> x + y).orElse(0L);
+        long count = httpTimersStream.stream().map(Timer::count).reduce(Long::sum).orElse(0L);
 
         if (count != 0) {
           double max = httpTimersStream.stream().map(x -> x.max(TimeUnit.MILLISECONDS))
               .reduce((x, y) -> x > y ? x : y).orElse((double) 0);
           double totalTime = httpTimersStream.stream().map(x -> x.totalTime(TimeUnit.MILLISECONDS))
-              .reduce((x, y) -> (x + y)).orElse((double) 0);
+              .reduce(Double::sum).orElse((double) 0);
 
           resultsPerUriPerCrudOperation.put("count", count);
           resultsPerUriPerCrudOperation.put("max", max);
@@ -301,11 +301,11 @@ public class JHapyMetricsEndpoint {
 
       Collection<Timer> httpTimersStream = this.meterRegistry.find("http.server.requests")
           .tag("status", code).timers();
-      long count = httpTimersStream.stream().map(Timer::count).reduce((x, y) -> x + y).orElse(0L);
+      long count = httpTimersStream.stream().map(Timer::count).reduce(Long::sum).orElse(0L);
       double max = httpTimersStream.stream().map(x -> x.max(TimeUnit.MILLISECONDS))
           .reduce((x, y) -> x > y ? x : y).orElse((double) 0);
       double totalTime = httpTimersStream.stream().map(x -> x.totalTime(TimeUnit.MILLISECONDS))
-          .reduce((x, y) -> (x + y)).orElse((double) 0);
+          .reduce(Double::sum).orElse((double) 0);
 
       resultsPerCode.put("count", count);
       resultsPerCode.put("max", max);
@@ -317,7 +317,7 @@ public class JHapyMetricsEndpoint {
     resultsHttp.put("percode", resultsHttpPerCode);
 
     timers = this.meterRegistry.find("http.server.requests").timers();
-    long countAllrequests = timers.stream().map(Timer::count).reduce((x, y) -> x + y).orElse(0L);
+    long countAllrequests = timers.stream().map(Timer::count).reduce(Long::sum).orElse(0L);
     Map<String, Number> resultsHTTPAll = new HashMap<>();
     resultsHTTPAll.put("count", countAllrequests);
 

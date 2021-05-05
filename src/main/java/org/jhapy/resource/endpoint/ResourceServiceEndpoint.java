@@ -27,7 +27,6 @@ import org.jhapy.dto.serviceQuery.generic.SaveQuery;
 import org.jhapy.resource.domain.StoredFile;
 import org.jhapy.resource.service.ResourceService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,7 +52,7 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
 
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByStrIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("getById");
+    var loggerPrefix = getLoggerPrefix("getById");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(resourceService
           .getById(query.getId()), org.jhapy.dto.utils.StoredFile.class, getOrikaContext(query)));
@@ -64,7 +63,7 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
 
   @PostMapping(value = "/getByIdNoContent")
   public ResponseEntity<ServiceResult> getByIdNoContent(@RequestBody GetByStrIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("getByIdNoContent");
+    var loggerPrefix = getLoggerPrefix("getByIdNoContent");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(resourceService
               .getByIdNoContent(query.getId()), org.jhapy.dto.utils.StoredFile.class,
@@ -76,7 +75,7 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
 
   @PostMapping(value = "/getByIdPdfContent")
   public ResponseEntity<ServiceResult> getByIdPdfContent(@RequestBody GetByStrIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("getByIdPdfContent");
+    var loggerPrefix = getLoggerPrefix("getByIdPdfContent");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(resourceService
               .getByIdPdfContent(query.getId()), org.jhapy.dto.utils.StoredFile.class,
@@ -89,7 +88,7 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.utils.StoredFile> query) {
-    String loggerPrefix = getLoggerPrefix("save");
+    var loggerPrefix = getLoggerPrefix("save");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(resourceService
               .save(mapperFacade
@@ -102,7 +101,7 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
 
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByStrIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("delete");
+    var loggerPrefix = getLoggerPrefix("delete");
     try {
       resourceService.delete(query.getId());
       return handleResult(loggerPrefix);

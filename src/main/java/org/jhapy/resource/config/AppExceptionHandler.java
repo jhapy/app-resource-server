@@ -23,10 +23,8 @@ public class AppExceptionHandler implements HasLogger {
   public ResponseEntity<?> handleException(AccessDeniedException exception) {
     Optional<String> user = SecurityUtils.getCurrentUserLogin();
 
-    if (user.isPresent()) {
-      logger().warn("User: " + user.get()
-          + " attempted to access an unauthorized area : " + exception.getMessage(), exception);
-    }
+    user.ifPresent(s -> logger().warn("User: " + s
+        + " attempted to access an unauthorized area : " + exception.getMessage(), exception));
 
     return ResponseEntity.ok(new ServiceResult<>(exception));
   }

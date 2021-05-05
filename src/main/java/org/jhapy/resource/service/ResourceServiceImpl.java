@@ -100,7 +100,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
 
   @Override
   public StoredFile getById(String id) {
-    String loggerPrefix = getLoggerPrefix("getById", id);
+    var loggerPrefix = getLoggerPrefix("getById", id);
 
     StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
     if (storedFile != null) {
@@ -168,7 +168,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
 
   @Override
   public StoredFile getByIdPdfContent(String id) {
-    String loggerPrefix = getLoggerPrefix("getByIdPdfContent", id);
+    var loggerPrefix = getLoggerPrefix("getByIdPdfContent", id);
 
     StoredFile storedFile = storedFileRepository.findById(id).orElse(null);
     if (storedFile != null) {
@@ -199,7 +199,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
   @Scheduled(fixedRate = 60000)
   @Transactional
   protected void convertPdfs() {
-    String loggerPrefix = getLoggerPrefix("convertPdfs");
+    var loggerPrefix = getLoggerPrefix("convertPdfs");
     long start = System.currentTimeMillis();
     logger().debug(loggerPrefix + "Starting to convert");
     Page<StoredFile> storedFiles = storedFileRepository
@@ -270,11 +270,11 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
   @Override
   @Transactional
   public void migrateGridFS() {
-    String loggerPrefix = getLoggerPrefix("migrateGridFS");
+    var loggerPrefix = getLoggerPrefix("migrateGridFS");
 
     logger().debug(loggerPrefix + "Start migration");
     List<StoredFile> allFiles = storedFileRepository.findAll();
-    allFiles.forEach(storedFile -> save(storedFile));
+    allFiles.forEach(this::save);
     logger().debug(loggerPrefix + "End migration");
   }
 
@@ -350,7 +350,7 @@ public class ResourceServiceImpl implements ResourceService, HasLogger {
   }
 
   private byte[] convertToPdf(StoredFile entity) {
-    String loggerPrefix = getLoggerPrefix("convertToPdf", entity.getId(), entity.getFilename());
+    var loggerPrefix = getLoggerPrefix("convertToPdf", entity.getId(), entity.getFilename());
     if (entity.getContent() == null || entity.getContent().length == 0) {
       logger().warn(loggerPrefix + "Empty content, skip");
       return null;
