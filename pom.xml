@@ -9,6 +9,7 @@
     <groupId>org.jhapy</groupId>
     <artifactId>jhapy-bom</artifactId>
     <version>3.0.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
 
   <artifactId>app-resource-server</artifactId>
@@ -86,10 +87,6 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.zalando</groupId>
-      <artifactId>problem-spring-web</artifactId>
-    </dependency>
 
     <!-- Swagger2 dependencies -->
     <dependency>
@@ -100,6 +97,29 @@
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-security</artifactId>
     </dependency>
+
+    <!-- Jackson dependency -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-json-org</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-afterburner</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <!-- End Jackson -->
 
     <!-- Monitoring dependencies -->
     <dependency>
