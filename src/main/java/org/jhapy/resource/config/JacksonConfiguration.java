@@ -28,8 +28,10 @@ import org.zalando.problem.violations.ConstraintViolationProblemModule;
 
 @Configuration
 public class JacksonConfiguration {
+
   /**
    * Support for Java date and time API.
+   *
    * @return the corresponding Jackson module.
    */
   @Bean
