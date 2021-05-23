@@ -112,7 +112,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Bean
   JwtDecoder jwtDecoder() {
-    NimbusJwtDecoder jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromOidcIssuerLocation(issuerUri);
+    NimbusJwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuerUri);
 
     OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(
         appProperties.getSecurity().getOauth2().getAudience());

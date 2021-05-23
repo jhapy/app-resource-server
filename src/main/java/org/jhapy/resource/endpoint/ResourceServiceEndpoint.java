@@ -19,12 +19,11 @@
 package org.jhapy.resource.endpoint;
 
 import org.jhapy.commons.endpoint.BaseEndpoint;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.DeleteByStrIdQuery;
 import org.jhapy.dto.serviceQuery.generic.GetByStrIdQuery;
 import org.jhapy.dto.serviceQuery.generic.SaveQuery;
-import org.jhapy.resource.domain.StoredFile;
+import org.jhapy.resource.converter.ResourceConverterV2;
 import org.jhapy.resource.service.ResourceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,68 +44,48 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
   private final ResourceService resourceService;
 
   public ResourceServiceEndpoint(ResourceService resourceService,
-      OrikaBeanMapper mapperFacade) {
-    super(mapperFacade);
+      ResourceConverterV2 converter) {
+    super(converter);
     this.resourceService = resourceService;
+  }
+
+  protected ResourceConverterV2 getConverter() {
+    return (ResourceConverterV2) converter;
   }
 
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByStrIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getById");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(resourceService
-          .getById(query.getId()), org.jhapy.dto.utils.StoredFile.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    return handleResult(loggerPrefix,
+        getConverter().convertToDto(resourceService.getById(query.getId())));
   }
 
   @PostMapping(value = "/getByIdNoContent")
   public ResponseEntity<ServiceResult> getByIdNoContent(@RequestBody GetByStrIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getByIdNoContent");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(resourceService
-              .getByIdNoContent(query.getId()), org.jhapy.dto.utils.StoredFile.class,
-          getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    return handleResult(loggerPrefix,
+        getConverter().convertToDto(resourceService.getByIdNoContent(query.getId())));
   }
 
   @PostMapping(value = "/getByIdPdfContent")
   public ResponseEntity<ServiceResult> getByIdPdfContent(@RequestBody GetByStrIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getByIdPdfContent");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(resourceService
-              .getByIdPdfContent(query.getId()), org.jhapy.dto.utils.StoredFile.class,
-          getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    return handleResult(loggerPrefix,
+        getConverter().convertToDto(resourceService.getByIdPdfContent(query.getId())));
   }
 
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.utils.StoredFile> query) {
     var loggerPrefix = getLoggerPrefix("save");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(resourceService
-              .save(mapperFacade
-                  .map(query.getEntity(), StoredFile.class, getOrikaContext(query))),
-          org.jhapy.dto.utils.StoredFile.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    return handleResult(loggerPrefix, getConverter()
+        .convertToDto(resourceService.save(getConverter().convertToDomain(query.getEntity()))));
   }
 
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByStrIdQuery query) {
     var loggerPrefix = getLoggerPrefix("delete");
-    try {
-      resourceService.delete(query.getId());
-      return handleResult(loggerPrefix);
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    resourceService.delete(query.getId());
+    return handleResult(loggerPrefix);
   }
 }
