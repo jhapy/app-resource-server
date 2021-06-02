@@ -18,14 +18,21 @@
 
 package org.jhapy.resource.endpoint;
 
+import java.io.InputStream;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.DeleteByStrIdQuery;
 import org.jhapy.dto.serviceQuery.generic.GetByStrIdQuery;
 import org.jhapy.dto.serviceQuery.generic.SaveQuery;
 import org.jhapy.resource.converter.ResourceConverterV2;
+import org.jhapy.resource.domain.StoredFile;
 import org.jhapy.resource.service.ResourceService;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,5 +94,16 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
     var loggerPrefix = getLoggerPrefix("delete");
     resourceService.delete(query.getId());
     return handleResult(loggerPrefix);
+  }
+
+  @GetMapping(value = "/download")
+  public ResponseEntity<byte[]> download(@RequestBody GetByStrIdQuery query) {
+    var headers = new HttpHeaders();
+    var storedFile = resourceService.getById(query.getId());
+    headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+    headers.setPragma("no-cache");
+    headers.setExpires(0);
+    headers.setContentType(MediaType.valueOf(storedFile.getMimeType()));
+    return new ResponseEntity<>( storedFile.getContent(), headers, HttpStatus.OK);
   }
 }
