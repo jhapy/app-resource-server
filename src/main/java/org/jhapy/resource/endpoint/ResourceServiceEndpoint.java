@@ -19,6 +19,7 @@
 package org.jhapy.resource.endpoint;
 
 import java.io.InputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.DeleteByStrIdQuery;
@@ -28,6 +29,7 @@ import org.jhapy.resource.converter.ResourceConverterV2;
 import org.jhapy.resource.domain.StoredFile;
 import org.jhapy.resource.service.ResourceService;
 import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -103,7 +105,11 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
     headers.setCacheControl(CacheControl.noCache().getHeaderValue());
     headers.setPragma("no-cache");
     headers.setExpires(0);
-    headers.setContentType(MediaType.valueOf(storedFile.getMimeType()));
+    if( StringUtils.isNotBlank(storedFile.getMimeType()))
+      headers.setContentType(MediaType.valueOf(storedFile.getMimeType()));
+    if (StringUtils.isNotBlank(storedFile.getFilename() ))
+      headers.setContentDisposition(ContentDisposition.attachment().filename(storedFile.getFilename().replace(" ", "_")).build());
+
     return new ResponseEntity<>( storedFile.getContent(), headers, HttpStatus.OK);
   }
 }
