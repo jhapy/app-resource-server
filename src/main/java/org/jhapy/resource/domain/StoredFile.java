@@ -20,8 +20,6 @@ package org.jhapy.resource.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -52,7 +50,6 @@ public class StoredFile extends BaseEntity {
   private byte[] orginalContent;
   private String originalContentFileId;
 
-  @Enumerated(EnumType.STRING)
   private PdfConvert pdfConvertStatus;
   private byte[] pdfContent;
   private String pdfContentFileId;
