@@ -20,6 +20,8 @@ package org.jhapy.resource.service;
 
 import org.jhapy.resource.domain.StoredFile;
 
+import java.util.UUID;
+
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
@@ -29,14 +31,13 @@ public interface ResourceService {
 
   StoredFile save(StoredFile storedFile);
 
-  StoredFile getById(String id);
+  StoredFile getById(UUID id);
 
-  void delete(String id);
+  void delete(UUID id);
 
-  StoredFile getByIdNoContent(String id);
+  StoredFile getByIdNoContent(UUID id);
 
-  StoredFile getByIdPdfContent(String id);
+  StoredFile getByIdPdfContent(UUID id);
 
   void migrateGridFS();
-
 }

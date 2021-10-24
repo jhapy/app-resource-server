@@ -18,12 +18,14 @@
 
 package org.jhapy.resource.domain;
 
-import java.util.HashMap;
-import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author jHapy Lead Dev.
@@ -33,7 +35,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "storedFile")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true, exclude = {"content", "orginalContent", "pdfContent"})
+@ToString(
+    callSuper = true,
+    exclude = {"content", "orginalContent", "pdfContent"})
 public class StoredFile extends BaseEntity {
 
   private String filename;
@@ -56,6 +60,6 @@ public class StoredFile extends BaseEntity {
 
   private Map<String, String> metadata = new HashMap<>();
 
-  private Long relatedObjectId;
+  private UUID relatedObjectId;
   private String relatedObjectClass;
 }
