@@ -18,8 +18,6 @@
 
 package org.jhapy.resource.config;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import org.jhapy.commons.config.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +29,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-/**
- * Configuration of web application with Servlet 3.0 APIs.
- */
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
+/** Configuration of web application with Servlet 3.0 APIs. */
 @Configuration
 public class WebConfigurer implements ServletContextInitializer {
 
@@ -51,8 +50,7 @@ public class WebConfigurer implements ServletContextInitializer {
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
     if (env.getActiveProfiles().length != 0) {
-      log.info("Web application configuration, using profiles: {}",
-          env.getActiveProfiles());
+      log.info("Web application configuration, using profiles: {}", env.getActiveProfiles());
     }
     log.info("Web application fully configured");
   }
@@ -71,5 +69,4 @@ public class WebConfigurer implements ServletContextInitializer {
     }
     return new CorsFilter(source);
   }
-
 }

@@ -18,7 +18,6 @@
 
 package org.jhapy.resource.aop.logging;
 
-import java.util.Arrays;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -29,10 +28,12 @@ import org.jhapy.commons.utils.SpringProfileConstants;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 
+import java.util.Arrays;
+
 /**
  * Aspect for logging execution of service and repository Spring components.
  *
- * By default, it only runs with the "dev" profile.
+ * <p>By default, it only runs with the "dev" profile.
  */
 public class LoggingAspect implements HasLogger {
 
@@ -42,27 +43,23 @@ public class LoggingAspect implements HasLogger {
     this.env = env;
   }
 
-  /**
-   * Pointcut that matches all repositories, services and Web REST endpoints.
-   */
-  @Pointcut("within(@org.springframework.stereotype.Repository *)" +
-      " || within(@org.springframework.stereotype.Service *)" +
-      " || within(@org.springframework.web.bind.annotation.RestController *)")
+  /** Pointcut that matches all repositories, services and Web REST endpoints. */
+  @Pointcut(
+      "within(@org.springframework.stereotype.Repository *)"
+          + " || within(@org.springframework.stereotype.Service *)"
+          + " || within(@org.springframework.web.bind.annotation.RestController *)")
   public void springBeanPointcut() {
     // Method is empty as this is just a Pointcut, the implementations are in the advices.
   }
 
-  /**
-   * Pointcut that matches all Spring beans in the application's main packages.
-   */
+  /** Pointcut that matches all Spring beans in the application's main packages. */
   @Pointcut("target(org.jhapy.resource.service.CrudService)")
   public void serviceEndpoint() {
     // Method is empty as this is just a Pointcut, the implementations are in the advices.
   }
 
   @Pointcut("!execution(@org.jhapy.resource.aop.logging.NoLog * *(..))")
-  public void methodAnnotatedWithNoLog() {
-  }
+  public void methodAnnotatedWithNoLog() {}
 
   /**
    * Advice that logs methods throwing exceptions.
@@ -75,17 +72,24 @@ public class LoggingAspect implements HasLogger {
     var loggerPrefix = getLoggerPrefix(joinPoint.getSignature().getName());
     Class sourceClass = joinPoint.getSignature().getDeclaringType();
 
-    if (env.acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT,
-        SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT_LOCAL))) {
+    if (env.acceptsProfiles(
+        Profiles.of(
+            SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT,
+            SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT_LOCAL))) {
       logger(sourceClass)
-          .error(loggerPrefix + ">>> Exception in {} with cause = '{}' and exception = '{}'",
+          .error(
+              loggerPrefix + ">>> Exception in {} with cause = '{}' and exception = '{}'",
               joinPoint.getSignature().toShortString(),
               e.getCause() != null ? e.getCause() : "NULL",
-              e.getMessage(), e);
+              e.getMessage(),
+              e);
 
     } else {
-      logger(sourceClass).error(loggerPrefix + ">>> Exception in {} with cause = {}",
-          joinPoint.getSignature().toShortString(), e.getCause() != null ? e.getCause() : "NULL");
+      logger(sourceClass)
+          .error(
+              loggerPrefix + ">>> Exception in {} with cause = {}",
+              joinPoint.getSignature().toShortString(),
+              e.getCause() != null ? e.getCause() : "NULL");
     }
   }
 
@@ -103,8 +107,10 @@ public class LoggingAspect implements HasLogger {
 
     // TODO : Add an endpoint to activate/deactivate at runtime
     if (logger(sourceClass).isTraceEnabled()) {
-      logger(sourceClass).debug(loggerPrefix + ">>> Enter with argument[s] = {}",
-          Arrays.toString(joinPoint.getArgs()));
+      logger(sourceClass)
+          .debug(
+              loggerPrefix + ">>> Enter with argument[s] = {}",
+              Arrays.toString(joinPoint.getArgs()));
     } else if (logger().isDebugEnabled()) {
       logger(sourceClass).debug(loggerPrefix + ">>> Enter");
     }
@@ -114,10 +120,14 @@ public class LoggingAspect implements HasLogger {
       long end = System.currentTimeMillis();
       long duration = end - start;
       if (duration > 1000) {
-        logger(sourceClass).warn(
-            loggerPrefix + ">>> Service or EndPoint Method: " + joinPoint.getSignature().getName()
-                + " took long ... "
-                + duration + " ms");
+        logger(sourceClass)
+            .warn(
+                loggerPrefix
+                    + ">>> Service or EndPoint Method: "
+                    + joinPoint.getSignature().getName()
+                    + " took long ... "
+                    + duration
+                    + " ms");
       }
       if (logger().isTraceEnabled()) {
         logger(sourceClass)
@@ -127,9 +137,11 @@ public class LoggingAspect implements HasLogger {
       }
       return result;
     } catch (IllegalArgumentException e) {
-      logger(sourceClass).error(loggerPrefix + ">>> Illegal argument: {} in {}",
-          Arrays.toString(joinPoint.getArgs()),
-          joinPoint.getSignature().toShortString());
+      logger(sourceClass)
+          .error(
+              loggerPrefix + ">>> Illegal argument: {} in {}",
+              Arrays.toString(joinPoint.getArgs()),
+              joinPoint.getSignature().toShortString());
 
       throw e;
     }
@@ -146,16 +158,22 @@ public class LoggingAspect implements HasLogger {
       long end = System.currentTimeMillis();
       long duration = end - start;
       if (duration > 1000) {
-        logger(sourceClass).warn(
-            loggerPrefix + ">>> Repository Method: " + joinPoint.getSignature().getName()
-                + " took long ... "
-                + duration + " ms");
+        logger(sourceClass)
+            .warn(
+                loggerPrefix
+                    + ">>> Repository Method: "
+                    + joinPoint.getSignature().getName()
+                    + " took long ... "
+                    + duration
+                    + " ms");
       }
       return result;
     } catch (IllegalArgumentException e) {
-      logger(sourceClass).error(loggerPrefix + ">>> Illegal argument: {} in {}",
-          Arrays.toString(joinPoint.getArgs()),
-          joinPoint.getSignature().toShortString());
+      logger(sourceClass)
+          .error(
+              loggerPrefix + ">>> Illegal argument: {} in {}",
+              Arrays.toString(joinPoint.getArgs()),
+              joinPoint.getSignature().toShortString());
 
       throw e;
     }

@@ -27,6 +27,4 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @Configuration
 @EnableScheduling
-public class SpringScheduler {
-
-}
+public class SpringScheduler {}

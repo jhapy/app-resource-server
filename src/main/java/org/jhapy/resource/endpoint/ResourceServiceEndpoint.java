@@ -19,13 +19,14 @@
 package org.jhapy.resource.endpoint;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jhapy.commons.endpoint.BaseEndpoint;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.queryhandling.QueryGateway;
+import org.jhapy.cqrs.query.resource.*;
+import org.jhapy.dto.domain.resource.StoredFileDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
-import org.jhapy.dto.serviceQuery.generic.DeleteByIdQuery;
 import org.jhapy.dto.serviceQuery.generic.GetByIdQuery;
-import org.jhapy.dto.serviceQuery.generic.SaveQuery;
-import org.jhapy.resource.converter.ResourceConverterV2;
-import org.jhapy.resource.service.ResourceService;
+import org.jhapy.resource.domain.StoredFile;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,31 +37,23 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/resourceService")
-public class ResourceServiceEndpoint extends BaseEndpoint {
+public class ResourceServiceEndpoint extends BaseEndpoint<StoredFile, StoredFileDTO> {
 
-  private final ResourceService resourceService;
-
-  public ResourceServiceEndpoint(ResourceService resourceService, ResourceConverterV2 converter) {
-    super(converter);
-    this.resourceService = resourceService;
-  }
-
-  protected ResourceConverterV2 getConverter() {
-    return (ResourceConverterV2) converter;
-  }
-
-  @PostMapping(value = "/getById")
-  public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
-    var loggerPrefix = getLoggerPrefix("getById");
-    return handleResult(
-        loggerPrefix, getConverter().convertToDto(resourceService.getById(query.getId())));
+  public ResourceServiceEndpoint(CommandGateway commandGateway, QueryGateway queryGateway) {
+    super(commandGateway, queryGateway);
   }
 
   @PostMapping(value = "/getByIdNoContent")
   public ResponseEntity<ServiceResult> getByIdNoContent(@RequestBody GetByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getByIdNoContent");
+
     return handleResult(
-        loggerPrefix, getConverter().convertToDto(resourceService.getByIdNoContent(query.getId())));
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetStoredFileByIdNoContentQuery(query.getId()),
+                ResponseTypes.instanceOf(GetStoredFileByIdNoContentResponse.class))
+            .join());
   }
 
   @PostMapping(value = "/getByIdPdfContent")
@@ -68,30 +61,24 @@ public class ResourceServiceEndpoint extends BaseEndpoint {
     var loggerPrefix = getLoggerPrefix("getByIdPdfContent");
     return handleResult(
         loggerPrefix,
-        getConverter().convertToDto(resourceService.getByIdPdfContent(query.getId())));
-  }
-
-  @PostMapping(value = "/save")
-  public ResponseEntity<ServiceResult> save(
-      @RequestBody SaveQuery<org.jhapy.dto.utils.StoredFile> query) {
-    var loggerPrefix = getLoggerPrefix("save");
-    return handleResult(
-        loggerPrefix,
-        getConverter()
-            .convertToDto(resourceService.save(getConverter().convertToDomain(query.getEntity()))));
-  }
-
-  @PostMapping(value = "/delete")
-  public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
-    var loggerPrefix = getLoggerPrefix("delete");
-    resourceService.delete(query.getId());
-    return handleResult(loggerPrefix);
+        queryGateway
+            .query(
+                new GetStoredFileByIdPdfContentQuery(query.getId()),
+                ResponseTypes.instanceOf(GetStoredFileByIdPdfContentResponse.class))
+            .join());
   }
 
   @GetMapping(value = "/download")
   public ResponseEntity<byte[]> download(@RequestBody GetByIdQuery query) {
+    GetStoredFileByIdResponse storedFileByIdResponse =
+        queryGateway
+            .query(
+                new GetStoredFileByIdQuery(query.getId()),
+                ResponseTypes.instanceOf(GetStoredFileByIdResponse.class))
+            .join();
+
     var headers = new HttpHeaders();
-    var storedFile = resourceService.getById(query.getId());
+    var storedFile = storedFileByIdResponse.getData();
     headers.setCacheControl(CacheControl.noCache().getHeaderValue());
     headers.setPragma("no-cache");
     headers.setExpires(0);

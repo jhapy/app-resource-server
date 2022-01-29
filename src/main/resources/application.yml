@@ -18,3 +18,4 @@ spring:
           - context-path=${server.servlet.context-path:}
   main:
     allow-bean-definition-overriding: true
+    allow-circular-references: true

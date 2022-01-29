@@ -18,20 +18,32 @@
 
 package org.jhapy.resource.config.changelogs;
 
-import com.github.cloudyrock.mongock.ChangeLog;
-import com.github.cloudyrock.mongock.ChangeSet;
-import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate;
+import io.mongock.api.annotations.*;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.resource.domain.StoredFile;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@ChangeLog
-public class InitialValuesChangeLog {
+@ChangeUnit(order = "001", id = "initialValuesChangeLog", author = "jHapy Dev1")
+public class InitialValuesChangeLog implements HasLogger {
 
-  @ChangeSet(order = "001", id = "createCollection", author = "jHapy Dev1")
-  public void createCollection(MongockTemplate mongoTemplate) {
-    if (!mongoTemplate.collectionExists("storedFile")) {
-      mongoTemplate.createCollection("storedFile");
-    }
+  @BeforeExecution
+  public void beforeExecution(MongoTemplate mongoTemplate) {
+
+    mongoTemplate.createCollection(StoredFile.class);
   }
 
+  @RollbackBeforeExecution
+  public void rollbackBeforeExecution(MongoTemplate mongoTemplate) {
+
+    mongoTemplate.dropCollection(StoredFile.class);
+  }
+
+  @Execution
+  public void execution(CommandGateway commandGateway) {}
+
+  @RollbackExecution
+  public void rollbackExecution(CommandGateway commandGateway) {}
 }

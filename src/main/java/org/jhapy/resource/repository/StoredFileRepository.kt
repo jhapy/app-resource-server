@@ -15,26 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.resource.repository
 
-package org.jhapy.resource.repository;
-
-import org.jhapy.resource.domain.PdfConvert;
-import org.jhapy.resource.domain.StoredFile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.repository.MongoRepository;
-
-import java.util.List;
-import java.util.UUID;
+import org.jhapy.resource.domain.PdfConvertEnum
+import org.jhapy.resource.domain.StoredFile
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.mongodb.repository.MongoRepository
+import java.util.*
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-05-15
  */
-public interface StoredFileRepository extends MongoRepository<StoredFile, UUID> {
-
-  List<StoredFile> findByPdfConvertStatus(PdfConvert pdfConvertStatus);
-
-  Page<StoredFile> findByPdfConvertStatus(PdfConvert pdfConvertStatus, Pageable pageable);
+interface StoredFileRepository : MongoRepository<StoredFile, UUID> {
+    fun findByPdfConvertStatus(pdfConvertStatus: PdfConvertEnum): List<StoredFile>
+    fun findByPdfConvertStatus(pdfConvertStatus: PdfConvertEnum, pageable: Pageable): Page<StoredFile>
 }
